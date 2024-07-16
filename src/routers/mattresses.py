@@ -4,7 +4,7 @@ from src.models.admin import Admin
 from src.schemas.mattresses import CreateMattress,CreateMattressPatch
 from database.database import sessionLocal
 from passlib.context import CryptContext
-from src.utils.token import decode_token_a_id
+from src.utils.token import decode_token_a_name
 from logs.log_config import logger
 from datetime import datetime 
 import uuid
@@ -57,7 +57,7 @@ def create_mattress(mattress:CreateMattress):
 
 @mattressauth.get("/get_mattress_detail",response_model=list[CreateMattress])
 def get_users_mattress_detail(token =Header(...)):
-    mattress_name=decode_token_a_id(token)
+    mattress_name=decode_token_a_name(token)
 
     db_mattress=db.query(Admin).filter(Admin.u_name == mattress_name,Admin.is_active == True,Admin.is_deleted == False).first()
 

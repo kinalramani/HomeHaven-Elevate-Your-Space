@@ -49,3 +49,26 @@ def send_otp_email(email: str, otp_code: str):
         print("Mail sent successfully")
     except Exception as e:
         print(f"Failed to send email: {e}")
+
+
+
+
+
+#---------------------------------------------------notification-----------------------------------
+
+def send_email(sender_email, receiver_email, password, subject, body):
+    message = MIMEMultipart()
+    message["From"] = sender_email
+    message["To"] = receiver_email
+    message["Subject"] = subject
+    message.attach(MIMEText(body, "plain"))
+
+    try:
+        server = smtplib.SMTP("smtp.gmail.com", 587)
+        server.starttls()
+        server.login(sender_email, password)
+        server.sendmail(sender_email, receiver_email, message.as_string())
+        server.quit()
+        return True, "Email sent successfully"
+    except Exception as e:
+        return False, f"Failed to send email: {e}"

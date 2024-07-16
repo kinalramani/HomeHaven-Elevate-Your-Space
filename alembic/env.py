@@ -16,6 +16,7 @@ from src.models.sofa import Sofas
 from src.models.customer_requirements import CustomerRequirements
 from src.models.delivery import Delivery
 from src.models.order import Order
+from src.models.delivery_boy import DeliveryBoy
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
