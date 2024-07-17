@@ -15,6 +15,7 @@ class Delivery(Base):
     user_name=Column(String(100),nullable=False)
     address=Column(String(200),nullable=False)
     payment=Column(String(100))
+    delivery_boy=Column(String(100),ForeignKey('deliveryboy.id'))
     status=Column(String(200),nullable=False )
     is_deleted = Column(Boolean, default=False)
     is_active = Column(Boolean, default=True)

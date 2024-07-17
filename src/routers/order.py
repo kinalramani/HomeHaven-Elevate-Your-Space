@@ -4,6 +4,7 @@ from src.models.admin import Admin
 from src.models.user import User
 from src.schemas.order import OrderCreate,OrderBase,OrderUpdate,OrderBasePatch
 from database.database import sessionLocal
+from src.models.delivery_boy import DeliveryBoy
 from passlib.context import CryptContext
 from src.utils.token import decode_token_a_id
 from logs.log_config import logger
@@ -34,9 +35,9 @@ def create_order_details(order:OrderBase):
         id = str(uuid.uuid4()),
         req_id = order.req_id,
         user_id = order.user_id,
-        description=order.description,
-        product_id=order.product_id,
-        notes =order.notes,
+        description = order.description,
+        product_id = order.product_id,
+        notes = order.notes,
         price = order.price,
         status = "pending",
     
@@ -165,6 +166,7 @@ def update_order_using_patch(order_id: str, order: OrderBasePatch):
     db_delivery.address = db_order.user_id,
     db_delivery.payment = db_order.price,
     db_delivery.status = db_order.status,
+    db_delivery.delivery_boy = db_delivery.delivery_boy,
 
     
     db.commit()

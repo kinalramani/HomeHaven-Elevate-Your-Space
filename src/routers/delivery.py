@@ -77,9 +77,9 @@ def update_delivery(delivery_id: str, delivery: DeliveryBase):
 
 
 @deliveryauth.put("/confirm_delivery")
-def confirm_reservation(reserve_id: str):
+def confirm_reservation(delivery_id: str):
     
-    db_delivery = db.query(Delivery).filter(Delivery.id == reserve_id, Delivery.is_active == True, Delivery.is_deleted == False).first()
+    db_delivery = db.query(Delivery).filter(Delivery.id == delivery_id, Delivery.is_active == True, Delivery.is_deleted == False).first()
     if db_delivery is None:
         raise HTTPException(status_code=404, detail="Delivery not found")
     

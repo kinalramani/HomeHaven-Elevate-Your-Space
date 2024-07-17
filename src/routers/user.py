@@ -269,7 +269,7 @@ def logging_user(e_mail:str, password:str):
         logger.warning(f"Incorrect password attempt for username: {e_mail}")
         raise HTTPException(status_code=404, detail="Password is incorrect")
     
-    access_token = logging_token(db_user.id,e_mail,db_user.e_mail)
+    access_token = logging_token(db_user.id,e_mail)
 
     logger.success(f"User {e_mail} logged in successfully")
     return  access_token

@@ -75,7 +75,7 @@ def get_users_mattress_detail(token =Header(...)):
 def update_deliveryboy_detail(deliveryboy: DeliveryBoyBasePatch,deliveryboy_id:str):
 
     logger.info(f"Attempting to update deliveruboy details for deliveryboy  ID: {deliveryboy_id}")
-    find_deliveryboy = db.query(deliveryboy).filter(deliveryboy.id == deliveryboy_id,deliveryboy.is_active == True).first()
+    find_deliveryboy = db.query(DeliveryBoy).filter(DeliveryBoy.id == deliveryboy_id,DeliveryBoy.is_active == True).first()
     
     if not find_deliveryboy:
         logger.warning(f"Deliveryboy with ID {deliveryboy_id} not found or is inactive")

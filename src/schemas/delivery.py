@@ -9,3 +9,4 @@ class DeliveryBase(BaseModel):
     address: str
     payment: str
     status: str
+    deliveryboy_id : str
