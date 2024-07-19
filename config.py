@@ -4,3 +4,6 @@ import os
 load_dotenv()
 
 db_url=os.environ.get("DB_URL")
+
+sender_email=os.environ.get("sender_email")
+password=os.environ.get("password")

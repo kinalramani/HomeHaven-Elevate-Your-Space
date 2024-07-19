@@ -6,6 +6,7 @@ import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from datetime import datetime,timedelta
+from config import sender_email,password
 
 
 
@@ -28,9 +29,10 @@ def generate_otp(email: str):
     db.commit()
     return otp_code
 
+
+
 def send_otp_email(email: str, otp_code: str):
-    sender_email = "kinalramani14@gmail.com"
-    password = "irnyitpcqjlebnmv"
+ 
     subject = "Your OTP Code"
     message_text = f"Your OTP is {otp_code} which is valid for 5 minutes"
 
@@ -72,3 +74,30 @@ def send_email(sender_email, receiver_email, password, subject, body):
         return True, "Email sent successfully"
     except Exception as e:
         return False, f"Failed to send email: {e}"
+    
+
+
+
+
+#------------------------------------------------------------payment-------------------------------------------
+
+def send_email(subject: str, recipient: str, body: str):
+    
+    msg = MIMEMultipart()
+    msg['From'] = sender_email
+    msg['To'] = recipient
+    msg['Subject'] = subject
+    
+    msg.attach(MIMEText(body, 'plain'))
+    
+    try:
+        server = smtplib.SMTP('smtp.example.com', 587)
+        server.starttls()
+        server.login(sender_email, password)
+        text = msg.as_string()
+        server.sendmail(sender_email, recipient, text)
+        server.quit()
+        return True, "Email sent successfully"
+    except Exception as e:
+        return False, f"Failed to send email: {e}"
+

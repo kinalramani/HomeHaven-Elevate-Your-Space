@@ -9,6 +9,7 @@ from src.routers.mattresses import mattressauth
 from src.routers.order import orderauth
 from src.routers.delivery import deliveryauth
 from src.routers.delivery_boy import deliveryboyauth
+from src.routers.payment import paymentauth
 
 
 
@@ -25,3 +26,4 @@ app.include_router(mattressauth)
 app.include_router(orderauth)
 app.include_router(deliveryauth)
 app.include_router(deliveryboyauth)
+app.include_router(paymentauth)
