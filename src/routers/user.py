@@ -7,7 +7,9 @@ from passlib.context import CryptContext
 from src.utils.token import logging_token,decode_token_u_id
 from logs.log_config import logger
 from datetime import datetime 
-from src.utils.otp import generate_otp,send_otp_email
+from src.utils.otp import generate_otp
+# from src.utils.otp import send_otp_email
+
 import uuid
 from src.models.admin import Admin
 from src.utils.token import decode_token_a_id,decode_token_a_name

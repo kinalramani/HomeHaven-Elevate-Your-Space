@@ -13,7 +13,8 @@ from src.routers.payment import paymentauth
 
 
 
-app=FastAPI()
+app = FastAPI()
+
 
 
 app.include_router(userauth)

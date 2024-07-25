@@ -1,16 +1,19 @@
 from fastapi import HTTPException,APIRouter,Header
 from src.models.order import Order
 from src.models.admin import Admin
-from src.schemas.payment import PaymentBase,PaymentBasepatch
+from src.models.user import User
+from src.schemas.payment import PaymentBase,PaymentBasepatch,PaymentIntentRequest
 from database.database import sessionLocal
 from src.models.payment import Payment
 from passlib.context import CryptContext
 from src.utils.token import decode_token_a_id
 from logs.log_config import logger
-from src.utils.otp import send_email
-from datetime import datetime 
+from src.utils.otp import ssend_email
 import uuid
-
+import stripe
+from stripe import SignatureVerificationError
+from logs.log_config import logger
+import os
 
 
 
@@ -23,36 +26,7 @@ pwd_context=CryptContext(schemes=["bcrypt"],deprecated="auto")
 
 
 
-#--------------------------------------------------register payment------------------------------------------
 
-
-@paymentauth.post("/create_payment",response_model=PaymentBase)
-def create_payment(payment:PaymentBase):
-    
-    db_order=db.query(Order).filter(Order.id == payment.order_id).first()
-
-    if db_order is None:
-        raise HTTPException(status_code=403,detail="order not found")
-    
-    amount = db_order.price
-    
-    new_payment=Payment(
-        id = str(uuid.uuid4()),
-        user_id=payment.user_id,
-        order_id = payment.order_id,
-        payment_method =payment.payment_method,
-        payment_date = payment.payment_date,
-        amount = amount,
-        status = payment.status,
-        transaction_id = payment.transaction_id,
-        currency = payment.currency,
-
-    )
-    db.add(new_payment)
-    db.commit()
-
-    logger.success(f"Payment created successfully with id: {new_payment.id}")
-    return new_payment
 
 
 #-------------------------------------------------------get payment details by admin---------------------------------
@@ -110,12 +84,11 @@ def update_payment(payment: PaymentBase,id:str):
 
     db_payments.user_id = payment.user_id,
     db_payments.order_id = payment.order_id,
-    db_payments.payment_method = payment.payment_method,
+    db_payments.payment_method ="COD",
     db_payments.payment_date = payment.payment_date,
     db_payments.amount = payment.amount,
-    db_payments.status = payment.status,
+    db_payments.status = "confirm",
     db_payments.transaction_id = payment.transaction_id,
-    db_payments.currency = payment.currency,
     
 
     db.commit()
@@ -142,33 +115,66 @@ def delete_product(id:str):
 
 @paymentauth.post("/make_payment", response_model=PaymentBase)
 def make_payment(payment: PaymentBase):
-    db_order = db.query(Order).filter(Order.id == payment.order_id).first()
+    db_order = db.query(Order).filter(
+        Order.id == payment.order_id,
+        Order.is_active == True,
+        Order.is_deleted == False
+    ).first()
 
     if db_order is None:
-        raise HTTPException(status_code=403, detail="order not found")
+        raise HTTPException(status_code=403, detail="Order not found")
     
     amount = db_order.price
+    
+    db_user = db.query(User).filter(User.id == payment.user_id).first()
+    
+    if db_user is None:
+        raise HTTPException(status_code=404, detail="User not found")
     
     new_payment = Payment(
         id=str(uuid.uuid4()),
         user_id=payment.user_id,
         order_id=payment.order_id,
-        payment_method=payment.payment_method,
+        payment_method="COD",
         payment_date=payment.payment_date,
         amount=amount,
-        status=payment.status,
+        status="confirm",
         transaction_id=payment.transaction_id,
-        currency=payment.currency,
     )
     db.add(new_payment)
     db.commit()
 
-    logger.success(f"Payment created successfully with id: {new_payment.id}")
-
     # Send email notification
-    user_email = "jenistalaviya3178@gmail.com"  # Replace with actual recipient email
+    user_email = db_user.e_mail  # Corrected attribute name
     subject = "Payment Confirmation"
     body = f"Your payment with ID {new_payment.id} has been successfully processed."
-    send_email(subject, user_email, body)
     
+    sender_email = "kinalramani14@gmail.com"  # Replace with your email
+    sender_password = "irnyitpcqjlebnmv"  # Replace with your email password or app password
+    
+    try:
+        success, message = ssend_email(subject, user_email, body, sender_email, sender_password)
+        if not success:
+            raise HTTPException(status_code=500, detail=f"Failed to send email: {message}")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to send email: {e}")
+
     return new_payment
+
+
+
+@paymentauth.post("/create_payment_intent")
+def create_payment_intent(request: PaymentIntentRequest):
+    try:
+        logger.info("Received request to create payment intent with amount: %d and currency: %s", request.amount)
+        
+        payment_intent = stripe.PaymentIntent.create(
+            amount=request.amount * 100,
+            currency=request.currency
+        )
+        
+        logger.info("Payment intent created successfully. Client secret: %s", payment_intent.client_secret)
+        return {"client_secret": payment_intent.client_secret}
+    except Exception as e:
+        logger.error("Error creating payment intent: %s", str(e))
+        raise HTTPException(status_code=500, detail=str(e))

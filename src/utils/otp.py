@@ -6,7 +6,7 @@ import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from datetime import datetime,timedelta
-from config import sender_email,password
+# from config import sender_email,password
 
 
 
@@ -31,26 +31,26 @@ def generate_otp(email: str):
 
 
 
-def send_otp_email(email: str, otp_code: str):
+# def send_otp_email(email: str, otp_code: str):
  
-    subject = "Your OTP Code"
-    message_text = f"Your OTP is {otp_code} which is valid for 5 minutes"
+#     subject = "Your OTP Code"
+#     message_text = f"Your OTP is {otp_code} which is valid for 5 minutes"
 
-    message = MIMEMultipart()
-    message["From"] = sender_email
-    message["To"] = email
-    message["Subject"] = subject
-    message.attach(MIMEText(message_text, "plain"))
+#     message = MIMEMultipart()
+#     message["From"] = sender_email
+#     message["To"] = email
+#     message["Subject"] = subject
+#     message.attach(MIMEText(message_text, "plain"))
 
-    try:
-        server = smtplib.SMTP("smtp.gmail.com", 587)
-        server.starttls()
-        server.login(sender_email, password)
-        server.sendmail(sender_email, email, message.as_string())
-        server.quit()
-        print("Mail sent successfully")
-    except Exception as e:
-        print(f"Failed to send email: {e}")
+#     try:
+#         server = smtplib.SMTP("smtp.gmail.com", 587)
+#         server.starttls()
+#         server.login(sender_email, password)
+#         server.sendmail(sender_email, email, message.as_string())
+#         server.quit()
+#         print("Mail sent successfully")
+#     except Exception as e:
+#         print(f"Failed to send email: {e}")
 
 
 
@@ -78,11 +78,31 @@ def send_email(sender_email, receiver_email, password, subject, body):
 
 
 
-
 #------------------------------------------------------------payment-------------------------------------------
 
-def send_email(subject: str, recipient: str, body: str):
+# def ssend_email(subject: str, recipient: str, body: str):
     
+#     msg = MIMEMultipart()
+#     msg['From'] = sender_email
+#     msg['To'] = recipient
+#     msg['Subject'] = subject
+    
+#     msg.attach(MIMEText(body, 'plain'))
+    
+#     try:
+#         server = smtplib.SMTP('smtp.example.com', 587)
+#         server.starttls()
+#         server.login(sender_email, password)
+#         text = msg.as_string()
+#         server.sendmail(sender_email, recipient, text)
+#         server.quit()
+#         return True, "Email sent successfully"
+#     except Exception as e:
+#         return False, f"Failed to send email: {e}"
+    
+
+ 
+def ssend_email(subject: str, recipient: str, body: str, sender_email: str, password: str):
     msg = MIMEMultipart()
     msg['From'] = sender_email
     msg['To'] = recipient
@@ -91,7 +111,7 @@ def send_email(subject: str, recipient: str, body: str):
     msg.attach(MIMEText(body, 'plain'))
     
     try:
-        server = smtplib.SMTP('smtp.example.com', 587)
+        server = smtplib.SMTP('smtp.gmail.com', 587)  # Correct SMTP server
         server.starttls()
         server.login(sender_email, password)
         text = msg.as_string()
@@ -100,4 +120,3 @@ def send_email(subject: str, recipient: str, body: str):
         return True, "Email sent successfully"
     except Exception as e:
         return False, f"Failed to send email: {e}"
-
