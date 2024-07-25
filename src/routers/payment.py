@@ -9,6 +9,7 @@ from passlib.context import CryptContext
 from src.utils.token import decode_token_a_id
 from logs.log_config import logger
 from src.utils.otp import ssend_email
+from config import sender_email,password
 import uuid
 import stripe
 from stripe import SignatureVerificationError
@@ -113,53 +114,53 @@ def delete_product(id:str):
 #-------------------------------------------------create_payment_internet---------------------------------
 
 
-@paymentauth.post("/make_payment", response_model=PaymentBase)
-def make_payment(payment: PaymentBase):
-    db_order = db.query(Order).filter(
-        Order.id == payment.order_id,
-        Order.is_active == True,
-        Order.is_deleted == False
-    ).first()
+# @paymentauth.post("/make_payment", response_model=PaymentBase)
+# def make_payment(payment: PaymentBase):
+#     db_order = db.query(Order).filter(
+#         Order.id == payment.order_id,
+#         Order.is_active == True,
+#         Order.is_deleted == False
+#     ).first()
 
-    if db_order is None:
-        raise HTTPException(status_code=403, detail="Order not found")
+#     if db_order is None:
+#         raise HTTPException(status_code=403, detail="Order not found")
     
-    amount = db_order.price
+#     amount = db_order.price
     
-    db_user = db.query(User).filter(User.id == payment.user_id).first()
+#     db_user = db.query(User).filter(User.id == payment.user_id).first()
     
-    if db_user is None:
-        raise HTTPException(status_code=404, detail="User not found")
+#     if db_user is None:
+#         raise HTTPException(status_code=404, detail="User not found")
     
-    new_payment = Payment(
-        id=str(uuid.uuid4()),
-        user_id=payment.user_id,
-        order_id=payment.order_id,
-        payment_method="COD",
-        payment_date=payment.payment_date,
-        amount=amount,
-        status="confirm",
-        transaction_id=payment.transaction_id,
-    )
-    db.add(new_payment)
-    db.commit()
+#     new_payment = Payment(
+#         id=str(uuid.uuid4()),
+#         user_id=payment.user_id,
+#         order_id=payment.order_id,
+#         payment_method="COD",
+#         payment_date=payment.payment_date,
+#         amount=amount,
+#         status="confirm",
+#         transaction_id=payment.transaction_id,
+#     )
+#     db.add(new_payment)
+#     db.commit()
 
-    # Send email notification
-    user_email = db_user.e_mail  # Corrected attribute name
-    subject = "Payment Confirmation"
-    body = f"Your payment with ID {new_payment.id} has been successfully processed."
+#     # Send email notification
+#     user_email = db_user.e_mail  # Corrected attribute name
+#     subject = "Payment Confirmation"
+#     body = f"Your payment with ID {new_payment.id} has been successfully processed."
     
-    sender_email = "kinalramani14@gmail.com"  # Replace with your email
-    sender_password = "irnyitpcqjlebnmv"  # Replace with your email password or app password
     
-    try:
-        success, message = ssend_email(subject, user_email, body, sender_email, sender_password)
-        if not success:
-            raise HTTPException(status_code=500, detail=f"Failed to send email: {message}")
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to send email: {e}")
+    
+    
+#     try:
+#         success, message = ssend_email(subject, user_email, body, sender_email, password)
+#         if not success:
+#             raise HTTPException(status_code=500, detail=f"Failed to send email: {message}")
+#     except Exception as e:
+#         raise HTTPException(status_code=500, detail=f"Failed to send email: {e}")
 
-    return new_payment
+#     return new_payment
 
 
 
