@@ -30,7 +30,8 @@ pwd_context=CryptContext(schemes=["bcrypt"],deprecated="auto")
 
 @orderauth.post("/create_orders_details",response_model=OrderBase)
 def create_order_details(order:OrderBase):
-    breakpoint()
+    logger.info("Creating a new order")
+
     new_order=Order(
         id = str(uuid.uuid4()),
         req_id = order.req_id,
@@ -45,6 +46,8 @@ def create_order_details(order:OrderBase):
     db.add(new_order)
     db.commit()
     db.refresh(new_order)
+    logger.success(f"Order created with ID: {new_order.id}")
+
     
 
     new_delivery=Delivery(
@@ -60,6 +63,7 @@ def create_order_details(order:OrderBase):
     db.add(new_delivery)
     db.commit()
     db.refresh(new_delivery)
+    logger.success(f"Delivery created for order ID: {new_order.id}")
 
     return new_order
 
@@ -68,11 +72,13 @@ def create_order_details(order:OrderBase):
 
 @orderauth.get("/get_all_order_details",response_model=list[OrderBase])
 def get_all_order_details(token = Header(...)):
+    logger.info("Decoding token and fetching order details")
     order_details=decode_token_a_id(token)
 
     db_order=db.query(Admin).filter(Admin.u_name == order_details,Admin.is_active == True,Admin.is_deleted == False).first()
 
     if db_order is  None:
+        logger.warning("Invalid token")
         raise HTTPException(status_code=200,detail="invalid token")
     
     logger.info(f"Fetching details for order ID")
@@ -109,8 +115,10 @@ def get_employee_detail(order_id : str):
 @orderauth.patch("/update_orders_using_patch", response_model=OrderBasePatch)
 def update_order_using_patch(order_id: str, order: OrderBasePatch):
 
+    logger.info(f"Updating order with ID: {order_id}")
     db_order = db.query(Order).filter(Order.id == order_id).first()
     if db_order is None:
+        logger.warning(f"Order with ID {order_id} not found")
         raise HTTPException(status_code=404, detail="Order not found")
     
     
@@ -118,10 +126,12 @@ def update_order_using_patch(order_id: str, order: OrderBasePatch):
         setattr(db_order, key, value)
     db.commit()
     db.refresh(db_order)
+    logger.info(f"Order with ID: {order_id} updated successfully")
 
 
     db_delivery = db.query(Delivery).filter(Delivery.id == db_order.id).first()
     if db_delivery is None:
+        logger.warning(f"Delivery for order ID {order_id} not found")
         raise HTTPException(status_code=404, detail="Delivery not found")
     
     
@@ -130,7 +140,8 @@ def update_order_using_patch(order_id: str, order: OrderBasePatch):
     db.commit()
     db.refresh(db_delivery)
 
-    
+    logger.success(f"Delivery for order ID: {order_id} updated successfully")
+
     return db_order
 
 
@@ -141,8 +152,10 @@ def update_order_using_patch(order_id: str, order: OrderBasePatch):
 @orderauth.put("/update_orders_using_put", response_model=OrderBase)
 def update_order_using_patch(order_id: str, order: OrderBasePatch):
 
+    logger.info(f"Updating order with ID: {order_id}")
     db_order = db.query(Order).filter(Order.id == order_id).first()
     if db_order is None:
+        logger.warning(f"Order with ID {order_id} not found")
         raise HTTPException(status_code=404, detail="Order not found")
     
     db_order.req_id = order.req_id
@@ -155,10 +168,12 @@ def update_order_using_patch(order_id: str, order: OrderBasePatch):
 
     db.commit()
     db.refresh(db_order)
+    logger.success(f"Order with ID: {order_id} updated successfully")
 
     db_delivery=db.query(Delivery).filter(Delivery.id == db_order.id).first()
 
     if db_delivery is None:
+        logger.warning(f"Delivery for order ID {order_id} not found")
         raise HTTPException(status_code=404,detail="delivery not db_order")
     
     db_delivery.order_id = db_order.id,
@@ -171,6 +186,7 @@ def update_order_using_patch(order_id: str, order: OrderBasePatch):
     
     db.commit()
     db.refresh(db_delivery)
+    logger.success(f"Delivery for order ID: {order_id} updated successfully")
     return db_order
 
 

@@ -27,22 +27,26 @@ pwd_context=CryptContext(schemes=["bcrypt"],deprecated="auto")
 
 @custreqauth.post("/create_customer_requirements_details",response_model=CreateCustReq)
 def create_customer_requirements_details(custreq:CreateCustReq):
+    logger.info(f"Creating customer requirements for product: {custreq.product_name}")
     product_1=db.query(Sofas).filter(Sofas.category == custreq.product_name,Sofas.is_active == True,Sofas.is_deleted == False).first()
     product_1=custreq.product_name
 
     if product_1 is None:
+        logger.warning(f"Product '{custreq.product_name}' not found in Sofas")
         raise HTTPException(status_code=404,detail="product_1 is not found")
     
     product_2=db.query(Mattresses).filter(Mattresses.category == custreq.product_name,Mattresses.is_active == True,Mattresses.is_deleted == False).first()
     product_2=custreq.product_name
 
     if product_2 is None:
+        logger.warning(f"Product '{custreq.product_name}' not found in Mattresses")
         raise HTTPException(status_code=404,detail="product_2 is not found")
     
     product_3=db.query(Curtains).filter(Curtains.category == custreq.product_name,Curtains.is_active == True,Curtains.is_deleted == False).first()
     product_3=custreq.product_name
 
     if product_3 is None:
+        logger.warning(f"Product '{custreq.product_name}' not found in Curtains")
         raise HTTPException(status_code=404,detail="product_3 is not found")
     
     
@@ -56,6 +60,7 @@ def create_customer_requirements_details(custreq:CreateCustReq):
     )
     db.add(new_custreq)
     db.commit()
+    logger.success(f"Customer requirement created with ID: {new_custreq.id}")
 
     return new_custreq
 

@@ -24,6 +24,7 @@ pwd_context=CryptContext(schemes=["bcrypt"],deprecated="auto")
 
 @sofaauth.post("/create_sofa",response_model=CreateSofa)
 def create_sofa(sofa:CreateSofa):
+    logger.info(f"sofas created")
 
     new_sofa=Sofas(
         id = str(uuid.uuid4()),

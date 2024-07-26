@@ -27,6 +27,7 @@ pwd_context=CryptContext(schemes=["bcrypt"],deprecated="auto")
 
 @deliveryboyauth.post("/create_delivery_boy",response_model=DeliveryBoyBase)
 def create_delivery_boy_detail(deliveryboy:DeliveryBoyBase):
+    logger.info(f"register delivery boy detail")
 
     new_deliveryboy=DeliveryBoy(
         id = str(uuid.uuid4()),
