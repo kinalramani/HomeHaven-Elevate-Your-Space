@@ -31,26 +31,26 @@ def generate_otp(email: str):
 
 
 
-# def send_otp_email(email: str, otp_code: str):
+def send_otp_email(email: str, otp_code: str):
  
-#     subject = "Your OTP Code"
-#     message_text = f"Your OTP is {otp_code} which is valid for 5 minutes"
+    subject = "Your OTP Code"
+    message_text = f"Your OTP is {otp_code} which is valid for 5 minutes"
 
-#     message = MIMEMultipart()
-#     message["From"] = sender_email
-#     message["To"] = email
-#     message["Subject"] = subject
-#     message.attach(MIMEText(message_text, "plain"))
+    message = MIMEMultipart()
+    message["From"] = sender_email
+    message["To"] = email
+    message["Subject"] = subject
+    message.attach(MIMEText(message_text, "plain"))
 
-#     try:
-#         server = smtplib.SMTP("smtp.gmail.com", 587)
-#         server.starttls()
-#         server.login(sender_email, password)
-#         server.sendmail(sender_email, email, message.as_string())
-#         server.quit()
-#         print("Mail sent successfully")
-#     except Exception as e:
-#         print(f"Failed to send email: {e}")
+    try:
+        server = smtplib.SMTP("smtp.gmail.com", 587)
+        server.starttls()
+        server.login(sender_email, password)
+        server.sendmail(sender_email, email, message.as_string())
+        server.quit()
+        print("Mail sent successfully")
+    except Exception as e:
+        print(f"Failed to send email: {e}")
 
 
 

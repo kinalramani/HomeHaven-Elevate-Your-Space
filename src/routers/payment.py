@@ -26,7 +26,40 @@ db=sessionLocal()
 pwd_context=CryptContext(schemes=["bcrypt"],deprecated="auto")
 
 
+#---------------------------------------------------register payment------------------------------------------------------
 
+@paymentauth.post("/make_payment", response_model=PaymentBase)
+def make_payment(payment: PaymentBase):
+    logger.info("Processing payment for order_id: %s, user_id: %s", payment.order_id, payment.user_id)
+    db_order = db.query(Order).filter(Order.id == payment.order_id,Order.is_active == True,Order.is_deleted == False).first()
+
+    if db_order is None:
+        logger.warning("Order not found: order_id=%s", payment.order_id)
+        raise HTTPException(status_code=403, detail="Order not found")
+    
+    amount = db_order.price
+    logger.info("Order found: order_id=%s, amount=%s", payment.order_id, amount)
+
+    db_user = db.query(User).filter(User.id == payment.user_id).first()
+    
+    if db_user is None:
+        logger.warning("User not found: user_id=%s", payment.user_id)
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    logger.info("User found: user_id=%s", payment.user_id)
+    new_payment = Payment(
+        id=str(uuid.uuid4()),
+        user_id=payment.user_id,
+        order_id=payment.order_id,
+        payment_method="COD",
+        payment_date=payment.payment_date,
+        amount=amount,
+        status="confirm",
+        transaction_id=payment.transaction_id,
+    )
+    logger.success("Payment created: payment_id=%s, user_id=%s, order_id=%s", new_payment.id, payment.user_id, payment.order_id)
+    db.add(new_payment)
+    db.commit()
 
 
 
@@ -40,6 +73,7 @@ def get_users_pyament_detail(token =Header(...)):
     db_payment=db.query(Admin).filter(Admin.u_name == admin_name,Admin.is_active == True,Admin.is_deleted == False).first()
 
     if db_payment is  None:
+        logger.warning(f"admin not found")
         raise HTTPException(status_code=200,detail="invalid token")
     
     logger.info(f"Fetching details for payment ID")
@@ -58,17 +92,21 @@ def get_users_pyament_detail(token =Header(...)):
 
 @paymentauth.patch("/update_paymen_using_patch", response_model=PaymentBasepatch)
 def update_payment(payment: PaymentBasepatch,id:str):
+    logger.info("Updating payment using PATCH for payment_id: %s", id)
     
     db_payments = db.query(Payment).filter(Payment.id == id, Payment.is_active == True,Payment.is_deleted==False).first()
 
     if  db_payments  is None:
+        logger.warning("Payment not found: payment_id=%s", id)
         raise HTTPException(status_code=404, detail="payment not found")
 
     for field_name, value in payment.dict().items():
         if value is not None:
             setattr( db_payments , field_name, value)
+            logger.info("Updated field %s to %s for payment_id: %s", field_name, value, id)
 
     db.commit()
+    logger.success("Payment updated successfully using PATCH: payment_id=%s", id)
     return  db_payments
 
 
@@ -77,10 +115,12 @@ def update_payment(payment: PaymentBasepatch,id:str):
 
 @paymentauth.put("/update_payment_using_put", response_model=PaymentBase)
 def update_payment(payment: PaymentBase,id:str):
+    logger.info("Updating payment using PUT for payment_id: %s", id)
     
     db_payments = db.query(Payment).filter(Payment.id == id, Payment.is_active == True,Payment.is_deleted==False).first()
 
     if  db_payments  is None:
+        logger.warning("Payment not found: payment_id=%s", id)
         raise HTTPException(status_code=404, detail="payment not found")
 
     db_payments.user_id = payment.user_id,
@@ -93,6 +133,7 @@ def update_payment(payment: PaymentBase,id:str):
     
 
     db.commit()
+    logger.success("Payment updated successfully using PUT: payment_id=%s", id)
     return  db_payments
 
 
@@ -101,12 +142,17 @@ def update_payment(payment: PaymentBase,id:str):
 
 @paymentauth.delete("/delete_payments")
 def delete_product(id:str):
+    logger.info("Attempting to delete payment with id: %s", id)
+
     db_payments = db.query(Payment).filter(Payment.id==id,Payment.is_active==True,Payment.is_deleted==False).first()
     if db_payments is None:
+        logger.warning("Payment not found: payment_id=%s", id)
+
         raise HTTPException(status_code=404,detail="payment not found")
     db_payments.is_active=False
     db_payments.is_deleted =True
     db.commit()
+    logger.success("Payment deleted successfully: payment_id=%s", id)
     return {"message": "payment deleted successfully"}
 
 
